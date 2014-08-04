@@ -112,7 +112,7 @@
             "byteOffset": 2304,
             "componentType": 5126,
             "count": 101,
-            "type": "SCALAR"
+            "type": "VEC2"
         },
         "animAccessor_1": {
             "bufferView": "bufferView_182",

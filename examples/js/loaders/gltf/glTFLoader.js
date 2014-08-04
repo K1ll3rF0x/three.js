@@ -378,13 +378,12 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 
     AnimationParameterDelegate.prototype.convert = function(resource, ctx) {
     	var parameter = ctx.parameter;
-
     	var glResource = null;
-    	switch (parameter.type) {
-	        case WebGLRenderingContext.FLOAT :
-	        case WebGLRenderingContext.FLOAT_VEC2 :
-	        case WebGLRenderingContext.FLOAT_VEC3 :
-	        case WebGLRenderingContext.FLOAT_VEC4 :
+        switch (parameter.type) {
+	        case 'SCALAR' :
+	        case 'VEC2' :
+	        case 'VEC3' :
+	        case 'VEC4' :
 	        	glResource = new Float32Array(resource, 0, parameter.count * componentsPerElementForGLType(parameter.type));
 	        	break;
 	        default:
@@ -453,7 +452,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 
     	var glResource = null;
     	switch (parameter.type) {
-	        case WebGLRenderingContext.FLOAT_MAT4 :
+	        case "MAT4" :
 	        	glResource = new Float32Array(resource, 0, parameter.count * componentsPerElementForGLType(parameter.type));
 	        	break;
 	        default:
@@ -1054,10 +1053,10 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
             value: function(entryID, description, userInfo) {
 
         		var threeNode = null;
-	            if (description.jointId) {
+	            if (description.joint) {
 	                threeNode = new THREE.Bone();
-	                threeNode.jointId = description.jointId;
-	                this.joints[description.jointId] = entryID;
+	                threeNode.jointId = description.joint;
+	                this.joints[description.joint] = entryID;
 	            }
 	            else {
 	                threeNode = new THREE.Object3D();
@@ -1136,8 +1135,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                 		var skin = skinEntry.object;
                 		description.instanceSkin.skin = skin;
                         threeNode.instanceSkin = description.instanceSkin;
-
-                		var sources = description.instanceSkin.sources;
+                		var sources = description.instanceSkin.meshes;
                 		skin.meshes = [];
                         sources.forEach( function(meshID) {
                             meshEntry = this.resources.getEntry(meshID);
@@ -1253,7 +1251,6 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         	                                	
         	                                	joint.skin = threeMesh;
         	                                    bones.push(joint);
-        	                                    
         	                                    var m = skin.inverseBindMatrices;
         	                    	            var mat = new THREE.Matrix4(
         	                                            m[i * 16 + 0],  m[i * 16 + 4],  m[i * 16 + 8],  m[i * 16 + 12],
@@ -1492,7 +1489,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                     );
 	            
 	            skin.jointsIds = description.joints;
-	            var inverseBindMatricesDescription = description.inverseBindMatrices;
+	            var inverseBindMatricesDescription = this.resources.getEntry(description.inverseBindMatrices).description;
 	            skin.inverseBindMatricesDescription = inverseBindMatricesDescription;
 	            skin.inverseBindMatricesDescription.id = entryID + "_inverseBindMatrices";
 
@@ -1504,9 +1501,9 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                 		count : inverseBindMatricesDescription.count,
                 		type : inverseBindMatricesDescription.type,
                 		id : inverseBindMatricesDescription.bufferView,
-                		name : skin.inverseBindMatricesDescription.id             
+                		name : inverseBindMatricesDescription.id
                 };
-                
+
 	            var context = new InverseBindMatricesContext(paramObject, skin);
 
                 var alreadyProcessedAttribute = THREE.GLTFLoaderUtils.getBuffer(paramObject, inverseBindMatricesDelegate, context);
