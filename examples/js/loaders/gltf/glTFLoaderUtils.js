@@ -81,6 +81,7 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
             xhr.responseType = (type === this.ARRAY_BUFFER) ? "arraybuffer" : "text";
 
             //if this is not specified, 1 "big blob" scenes fails to load.
+            // Comment out if using Access-Control-Allow-Origin header on server
             xhr.setRequestHeader("If-Modified-Since", "Sat, 01 Jan 1970 00:00:00 GMT");
             xhr.addEventListener( 'load', function ( event ) {
                 delegate.streamAvailable(path, xhr.response);
@@ -107,14 +108,14 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
             	this._resourcesStatus[request.id] = 1;
             }
             
-            var streamStatus = this._streamsStatus[request.path];
+            var streamStatus = this._streamsStatus[request.uri];
             if (streamStatus && streamStatus.status === "loading" )
             {
             	streamStatus.requests.push(request);
                 return;
             }
             
-            this._streamsStatus[request.path] = { status : "loading", requests : [request] };
+            this._streamsStatus[request.uri] = { status : "loading", requests : [request] };
     		
             var self = this;
             var processResourceDelegate = {};
@@ -139,13 +140,39 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
                 request.delegate.handleError(errorCode, info);
             }
 
-            this._loadStream(request.path, request.type, processResourceDelegate);
+            this._loadStream(request.uri, request.type, processResourceDelegate);
         }
     },
 
+    _getGLTypeForTypeName: {
+        value: function (glType) {
+
+            switch (glType) {
+                case 'SCALAR' :
+                    return WebGLRenderingContext.UNSIGNED_SHORT;
+                case 'VEC2':
+                    return WebGLRenderingContext.FLOAT_VEC2;
+                case 'VEC3' :
+                    return WebGLRenderingContext.FLOAT_VEC3;
+                case 'VEC4':
+                    return WebGLRenderingContext.FLOAT_VEC4;
+                case 'MAT3':
+                    return WebGLRenderingContext.FLOAT_MAT3 ;
+                case 'MAT4':
+                    return WebGLRenderingContext.FLOAT_MAT4;
+                default:
+                    return null;
+            }
+        }
+    },
 
     _elementSizeForGLType: {
         value: function(glType) {
+
+            if(typeof glType === 'string') {
+                glType = this._getGLTypeForTypeName(glType);
+            }
+
             switch (glType) {
                 case WebGLRenderingContext.FLOAT :
                     return Float32Array.BYTES_PER_ELEMENT;
@@ -179,7 +206,7 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
             this._handleRequest({   "id" : wrappedBufferView.id,
                                     "range" : range,
                                     "type" : buffer.description.type,
-                                    "path" : buffer.description.path,
+                                    "uri" : buffer.description.uri,
                                     "delegate" : delegate,
                                     "ctx" : ctx }, null);
         }
@@ -208,7 +235,7 @@ THREE.GLTFLoaderUtils = Object.create(Object, {
     		request.ctx = ctx;
 
             this._handleRequest({   "id" : request.id,
-                "path" : request.path,
+                "uri" : request.uri,
                 "range" : [0],
                 "type" : "text",
                 "delegate" : delegate,

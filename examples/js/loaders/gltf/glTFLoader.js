@@ -55,8 +55,32 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
     	}
     }
 
+    function getGLTypeForTypeName (glType) {
+            switch (glType) {
+                case 'SCALAR' :
+                    return WebGLRenderingContext.UNSIGNED_SHORT;
+                case 'VEC2':
+                    return WebGLRenderingContext.FLOAT_VEC2;
+                case 'VEC3' :
+                    return WebGLRenderingContext.FLOAT_VEC3;
+                case 'VEC4':
+                    return WebGLRenderingContext.FLOAT_VEC4;
+                case 'MAT3':
+                    return WebGLRenderingContext.FLOAT_MAT3 ;
+                case 'MAT4':
+                    return WebGLRenderingContext.FLOAT_MAT4;
+                default:
+                    return null;
+            }
+    }
+
     function componentsPerElementForGLType(glType) {
+        if (typeof glType === 'string') {
+            glType = getGLTypeForTypeName(glType);
+        }
+
         switch (glType) {
+
             case WebGLRenderingContext.FLOAT :
             case WebGLRenderingContext.UNSIGNED_BYTE :
             case WebGLRenderingContext.UNSIGNED_SHORT :
@@ -122,7 +146,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         if(this.indexArray && this.loadedAttributes === this.totalAttributes) {
         	
         	this.buildBufferGeometry();
-        	
+
             this.finished = true;
 
             if(this.onload) {
@@ -270,7 +294,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
     VertexAttributeDelegate.prototype.resourceAvailable = function(glResource, ctx) {
 
     	this.bufferResourceAvailable(glResource, ctx);
-    	
+
         var geom = ctx.geometry;
         geom.loadedAttributes++;
         geom.checkFinished();
@@ -467,14 +491,17 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
     ShaderDelegate.prototype.resourceAvailable = function(data, ctx) {
         theLoader.shadersLoaded++;
         theLoader.shaders[ctx.id] = data;
+
+        theLoader.checkComplete();
+
         return true;
     };
 
     var shaderDelegate = new ShaderDelegate();
 
-    var ShaderContext = function(id, path) {
+    var ShaderContext = function(id, uri) {
     	this.id = id;
-    	this.path = path;
+    	this.uri = uri;
     };
     
     // Resource management
@@ -581,10 +608,10 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         		this.resources.setEntry(entryID, null, description);
         		var shaderRequest = {
         				id : entryID,
-        				path : description.path,
+        				uri : description.uri
         		};
 
-                var shaderContext = new ShaderContext(entryID, description.path);
+                var shaderContext = new ShaderContext(entryID, description.uri);
 
                 theLoader.shadersRequested++;
         		THREE.GLTFLoaderUtils.getFile(shaderRequest, shaderDelegate, shaderContext);
@@ -613,22 +640,20 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         		var fragmentShader = theLoader.shaders[material.params.fragmentShader];
         		if (!fragmentShader) {
                     console.log("ERROR: Missing fragment shader definition:", material.params.fragmentShader);
-            		return new THREE.MeshPhongMaterial;
+            		return new THREE.MeshPhongMaterial();
         		}
         		
         		var vertexShader = theLoader.shaders[material.params.vertexShader];
         		if (!fragmentShader) {
                     console.log("ERROR: Missing vertex shader definition:", material.params.vertexShader);
-            		return new THREE.MeshPhongMaterial;
+            		return new THREE.MeshPhongMaterial();
         		}
         		
         		var uniforms = {};
         		var shaderMaterial = new THREE.ShaderMaterial( {
-
         			fragmentShader: fragmentShader,
         			vertexShader: vertexShader,
-        			uniforms: uniforms,
-
+        			uniforms: uniforms
         		} );
 
         		return new THREE.MeshPhongMaterial(material.params);
@@ -709,7 +734,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                         	{
                         		var imageEntry = this.resources.getEntry(textureEntry.description.source);
                         		if (imageEntry) {
-                        			texturePath = imageEntry.description.path;
+                        			texturePath = imageEntry.description.uri;
                         		}
                         		
                         		var samplerEntry = this.resources.getEntry(textureEntry.description.sampler);
@@ -751,7 +776,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                         	{
                         		var imageEntry = this.resources.getEntry(textureEntry.description.source);
                         		if (imageEntry) {
-                        			envMapPath = imageEntry.description.path;
+                        			envMapPath = imageEntry.description.uri;
                         		}
                         		
                         		var samplerEntry = this.resources.getEntry(textureEntry.description.sampler);
@@ -915,6 +940,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
                             		max : attribute.max,
                             		min : attribute.min,
                             		type : attribute.type,
+                                    componentType : attribute.componentType,
                             		id : attributeID             
                             };
                             
@@ -1236,7 +1262,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         	                                            m[i * 16 + 3],  m[i * 16 + 7],  m[i * 16 + 11], m[i * 16 + 15]
         	                                        );
         	                                    boneInverses.push(mat);
-        	                                    
+
         	                                } else {
         	                                    console.log("WARNING: jointId:"+jointId+" cannot be found in skeleton:"+skeleton);
         	                                }
@@ -1360,9 +1386,9 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 	            				var node = this.resources.getEntry(target.id);
 	            				if (node) {
 
-	            					var path = target.path;
+	            					var uri = target.uri;
 		            				
-		            				if (path == "rotation")
+		            				if (uri == "rotation")
 		            				{
 		            					convertAxisAngleToQuaternion(output.data, output.count);
 		            				}
@@ -1372,7 +1398,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 			            					values : output.data,
 			            					count : input.count,
 			            					target : node.object,
-			            					path : path,
+			            					uri : uri,
 			            					type : sampler.interpolation
 			            			};
 			            			
@@ -1569,7 +1595,7 @@ THREE.glTFLoader.prototype.callLoadedCallback = function() {
 }
 
 THREE.glTFLoader.prototype.checkComplete = function() {
-	if (this.meshesLoaded == this.meshesRequested 
+	if (this.meshesLoaded == this.meshesRequested
 			&& this.shadersLoaded == this.shadersRequested
 			&& this.animationsLoaded == this.animationsRequested)
 	{
