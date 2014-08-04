@@ -122,7 +122,7 @@ THREE.glTFInterpolator = function(param)
 	node.updateMatrix();
 	node.matrixAutoUpdate = true;
 	this.targetNode = node;
-	
+    
 	switch (param.path) {
 		case "translation" :
 			this.target = node.position;

@@ -1190,7 +1190,6 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 
         buildSkin: {
             value: function(node) {
-        	
                 var skin = node.instanceSkin.skin;
                 if (skin) {
                     node.instanceSkin.skeletons.forEach(function(skeleton) {
@@ -1383,7 +1382,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 	            				var node = this.resources.getEntry(target.id);
 	            				if (node) {
 
-	            					var uri = target.uri;
+	            					var uri = target.path;
 		            				
 		            				if (uri == "rotation")
 		            				{
@@ -1395,7 +1394,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 			            					values : output.data,
 			            					count : input.count,
 			            					target : node.object,
-			            					uri : uri,
+			            					path : uri,
 			            					type : sampler.interpolation
 			            			};
 			            			
@@ -1476,7 +1475,6 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         handleSkin: {
             value: function(entryID, description, userInfo) {
 	    		// Save skin entry
-        	
         		var skin = {
         		};
         		
