@@ -3,6 +3,7 @@ Sidebar.Geometry = function ( editor ) {
 	var signals = editor.signals;
 
 	var container = new UI.CollapsiblePanel();
+	container.setCollapsed( true );
 	container.setDisplay( 'none' );
 
 	var geometryType = new UI.Text().setTextTransform( 'uppercase' );
@@ -66,7 +67,7 @@ Sidebar.Geometry = function ( editor ) {
 
 			container.setDisplay( 'block' );
 
-			geometryType.setValue( editor.getGeometryType( object.geometry ) );
+			geometryType.setValue( geometry.type );
 
 			geometryUUID.setValue( geometry.uuid );
 			geometryName.setValue( geometry.name );

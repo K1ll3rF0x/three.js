@@ -49,11 +49,12 @@ var Viewport = function ( editor ) {
 
 		}
 
-		if ( editor.selected !== null ) {
+		render();
 
-			signals.objectChanged.dispatch( editor.selected );
+	} );
+	transformControls.addEventListener( 'objectChange', function () {
 
-		}
+		signals.objectChanged.dispatch( transformControls.object );
 
 	} );
 	sceneHelpers.add( transformControls );

@@ -1068,12 +1068,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
 
                 var m = description.matrix;
                 if(m) {
-                    threeNode.applyMatrix(new THREE.Matrix4(
-                        m[0],  m[4],  m[8],  m[12],
-                        m[1],  m[5],  m[9],  m[13],
-                        m[2],  m[6],  m[10], m[14],
-                        m[3],  m[7],  m[11], m[15]
-                    ));
+                    threeNode.applyMatrix(new THREE.Matrix4().fromArray( m ));
                     threeNode.matrixAutoUpdate = false;
                     threeNode.matrixWorldNeedsUpdate = true;
                 }
@@ -1251,7 +1246,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         	                                	joint.skin = threeMesh;
         	                                    bones.push(joint);
         	                                    var m = skin.inverseBindMatrices;
-        	                    	            var mat = new THREE.Matrix4(
+        	                    	            var mat = new THREE.Matrix4().set(
         	                                            m[i * 16 + 0],  m[i * 16 + 4],  m[i * 16 + 8],  m[i * 16 + 12],
         	                                            m[i * 16 + 1],  m[i * 16 + 5],  m[i * 16 + 9],  m[i * 16 + 13],
         	                                            m[i * 16 + 2],  m[i * 16 + 6],  m[i * 16 + 10], m[i * 16 + 14],
@@ -1479,12 +1474,7 @@ THREE.glTFLoader.prototype.load = function( url, callback ) {
         		};
         		
                 var m = description.bindShapeMatrix;
-	            skin.bindShapeMatrix = new THREE.Matrix4(
-                        m[0],  m[4],  m[8],  m[12],
-                        m[1],  m[5],  m[9],  m[13],
-                        m[2],  m[6],  m[10], m[14],
-                        m[3],  m[7],  m[11], m[15]
-                    );
+	            skin.bindShapeMatrix = new THREE.Matrix4().fromArray( m );
 	            
 	            skin.jointsIds = description.joints;
 	            var inverseBindMatricesDescription = this.resources.getEntry(description.inverseBindMatrices).description;
