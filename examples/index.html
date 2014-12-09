@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
 		<title>three.js - examples</title>
+		<meta charset="utf-8">
 		<style>
 
 			@font-face {
@@ -67,7 +67,6 @@
 			#viewer {
 				position: absolute;
 				left: 310px;
-				width: -webkit-calc(100% - 310px); /* Safari */
 				width: calc(100% - 310px);
 				height: 100%;
 				border: 0px;
@@ -97,7 +96,7 @@
 				<h1><a href="http://threejs.org">three.js</a> / examples</h1>
 			</div>
 		</div>
-		<iframe id="viewer"></iframe>
+		<iframe id="viewer" allowfullscreen></iframe>
 
 		<script>
 
@@ -160,6 +159,7 @@
 				"webgl_interactive_cubes",
 				"webgl_interactive_cubes_gpu",
 				"webgl_interactive_draggablecubes",
+				"webgl_interactive_lines",
 				"webgl_interactive_particles",
 				"webgl_interactive_raycasting_pointcloud",
 				"webgl_interactive_voxelpainter",
@@ -272,9 +272,6 @@
 				"webgl_trails",
 				"webgl_video_panorama_equirectangular"
 			],
-			"webgl3": [
-				"webgl3_performance"
-			],
 			"webgldeferred": [
 				"webgldeferred_animation",
 				"webgldeferred_arealights",
@@ -322,7 +319,6 @@
 				"canvas_geometry_text",
 				"canvas_interactive_cubes",
 				"canvas_interactive_cubes_tween",
-				"canvas_interactive_lines",
 				"canvas_interactive_particles",
 				"canvas_interactive_voxelpainter",
 				"canvas_lights_pointlights",
@@ -348,6 +344,7 @@
 				"raytracing_sandbox"
 			],
 			"software": [
+				"software_geometry_earth",
 				"software_sandbox"
 			]
 		};
@@ -356,6 +353,17 @@
 
 		var list = document.getElementById( 'list' );
 		var viewer = document.getElementById( 'viewer' );
+
+		if ( /(iPad|iPhone|iPod)/g.test( navigator.userAgent ) ) {
+
+			viewer.addEventListener( 'load', function ( event ) {
+
+				viewer.contentWindow.innerWidth -= 10;
+				viewer.contentWindow.innerHeight -= 2;
+
+			} );
+
+		}
 
 		var container = document.createElement( 'div' );
 		list.appendChild( container );

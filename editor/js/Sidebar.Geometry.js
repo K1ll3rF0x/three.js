@@ -3,7 +3,12 @@ Sidebar.Geometry = function ( editor ) {
 	var signals = editor.signals;
 
 	var container = new UI.CollapsiblePanel();
-	container.setCollapsed( true );
+	container.setCollapsed( editor.config.getKey( 'ui/sidebar/geometry/collapsed' ) );
+	container.onCollapsedChange( function ( boolean ) {
+
+		editor.config.setKey( 'ui/sidebar/geometry/collapsed', boolean );
+
+	} );
 	container.setDisplay( 'none' );
 
 	var geometryType = new UI.Text().setTextTransform( 'uppercase' );
@@ -121,6 +126,11 @@ Sidebar.Geometry = function ( editor ) {
 				parameters = new Sidebar.Geometry.TorusKnotGeometry( signals, object );
 				container.add( parameters );
 
+			} else {
+
+				parameters = new Sidebar.Geometry.Modifiers( signals, object );
+				container.add( parameters );
+
 			}
 
 		} else {
@@ -132,7 +142,6 @@ Sidebar.Geometry = function ( editor ) {
 	}
 
 	signals.objectSelected.add( build );
-	signals.objectChanged.add( build );
 
 	return container;
 

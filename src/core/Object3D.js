@@ -357,6 +357,7 @@ THREE.Object3D.prototype = {
 		if ( index !== - 1 ) {
 
 			object.parent = undefined;
+
 			object.dispatchEvent( { type: 'removed' } );
 
 			this.children.splice( index, 1 );
@@ -395,25 +396,16 @@ THREE.Object3D.prototype = {
 
 	getObjectById: function ( id, recursive ) {
 
+		if ( this.id === id ) return this;
+
 		for ( var i = 0, l = this.children.length; i < l; i ++ ) {
 
 			var child = this.children[ i ];
+			var object = child.getObjectById( id, recursive );
 
-			if ( child.id === id ) {
+			if ( object !== undefined ) {
 
-				return child;
-
-			}
-
-			if ( recursive === true ) {
-
-				child = child.getObjectById( id, recursive );
-
-				if ( child !== undefined ) {
-
-					return child;
-
-				}
+				return object;
 
 			}
 
@@ -425,25 +417,16 @@ THREE.Object3D.prototype = {
 
 	getObjectByName: function ( name, recursive ) {
 
+		if ( this.name === name ) return this;
+
 		for ( var i = 0, l = this.children.length; i < l; i ++ ) {
 
 			var child = this.children[ i ];
+			var object = child.getObjectByName( name, recursive );
 
-			if ( child.name === name ) {
+			if ( object !== undefined ) {
 
-				return child;
-
-			}
-
-			if ( recursive === true ) {
-
-				child = child.getObjectByName( name, recursive );
-
-				if ( child !== undefined ) {
-
-					return child;
-
-				}
+				return object;
 
 			}
 
@@ -577,6 +560,7 @@ THREE.Object3D.prototype = {
 
 			if ( object.name !== '' ) data.name = object.name;
 			if ( JSON.stringify( object.userData ) !== '{}' ) data.userData = object.userData;
+			if ( object.script !== undefined ) data.script = object.script.source;
 			if ( object.visible !== true ) data.visible = object.visible;
 
 			if ( object instanceof THREE.PerspectiveCamera ) {
@@ -690,6 +674,8 @@ THREE.Object3D.prototype = {
 
 		object.userData = JSON.parse( JSON.stringify( this.userData ) );
 
+		if ( this.script !== undefined ) object.script = this.script.clone();
+
 		if ( recursive === true ) {
 
 			for ( var i = 0; i < this.children.length; i ++ ) {
@@ -702,12 +688,6 @@ THREE.Object3D.prototype = {
 		}
 
 		return object;
-
-	},
-
-	dispose: function () {
-
-		this.dispatchEvent( { type: 'dispose' } );
 
 	}
 

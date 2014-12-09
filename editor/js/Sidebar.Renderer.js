@@ -5,7 +5,6 @@ Sidebar.Renderer = function ( editor ) {
 	var rendererTypes = {
 
 		'WebGLRenderer': THREE.WebGLRenderer,
-		'WebGLRenderer3': THREE.WebGLRenderer3,
 		'CanvasRenderer': THREE.CanvasRenderer,
 		'SVGRenderer': THREE.SVGRenderer,
 		'SoftwareRenderer': THREE.SoftwareRenderer,
@@ -14,7 +13,12 @@ Sidebar.Renderer = function ( editor ) {
 	};
 
 	var container = new UI.CollapsiblePanel();
-	container.setCollapsed( true );
+	container.setCollapsed( editor.config.getKey( 'ui/sidebar/renderer/collapsed' ) );
+	container.onCollapsedChange( function ( boolean ) {
+
+		editor.config.setKey( 'ui/sidebar/renderer/collapsed', boolean );
+
+	} );
 
 	container.addStatic( new UI.Text( 'RENDERER' ) );
 	container.add( new UI.Break() );
